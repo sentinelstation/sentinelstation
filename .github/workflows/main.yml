@@ -138,8 +138,6 @@ jobs:
       fail-fast: false
       matrix:
         targetPlatform:
-          - StandaloneWindows64
-          - StandaloneOSX
           - StandaloneLinux64
     steps:
       - uses: actions/download-artifact@v1
