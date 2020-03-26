@@ -153,10 +153,14 @@ jobs:
           cd Build
           zip -qq -r ../Build.zip .
 <<<<<<< HEAD
+<<<<<<< HEAD
           echo "${RUN_NUMBER}" > ../latest.txt
 =======
           echo "$(RUN_NUMBER)" > latest.txt
 >>>>>>> Experimental autoupdate stuff
+=======
+          echo "${RUN_NUMBER}" > latest.txt
+>>>>>>> I'm kind of stupid and forgot how bash works
       - name: Upload to CDN
         env:
           CDN_HOST: ${{ secrets.CDN_HOST }}
@@ -171,9 +175,13 @@ jobs:
           binary
           put "./Build.zip" "${UPLOAD_FOLDER}/${RUN_NUMBER}.zip"
 <<<<<<< HEAD
+<<<<<<< HEAD
           rm "latest.txt"
           put "./latest.txt" "latest.txt"
 =======
+=======
+          rm "latest.txt"
+>>>>>>> I'm kind of stupid and forgot how bash works
           put "latest.txt" "latest.txt"
 >>>>>>> Experimental autoupdate stuff
           bye
