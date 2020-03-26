@@ -147,9 +147,12 @@ jobs:
           name: ${{ matrix.targetPlatform }}
           path: ./Build
       - name: Zip Build
+        env: 
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
           cd Build
           zip -qq -r ../Build.zip .
+          echo "$(RUN_NUMBER)" > latest.txt
       - name: Upload to CDN
         env:
           CDN_HOST: ${{ secrets.CDN_HOST }}
@@ -164,6 +167,7 @@ jobs:
           binary
           rmdir "${UPLOAD_FOLDER}"
           put "./Build.zip" "${UPLOAD_FOLDER}/${RUN_NUMBER}.zip"
+          put "latest.txt" "latest.txt"
           bye
           EOF
 
