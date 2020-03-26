@@ -165,7 +165,6 @@ jobs:
           open $CDN_HOST
           user $CDN_USERNAME $CDN_PASSWORD
           binary
-          rmdir "${UPLOAD_FOLDER}"
           put "./Build.zip" "${UPLOAD_FOLDER}/${RUN_NUMBER}.zip"
           rm "latest.txt"
           put "./latest.txt" "latest.txt"
