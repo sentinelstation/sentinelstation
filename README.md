@@ -1,13 +1,13 @@
 # unitystation
-![Tests](https://github.com/sentinelstation/sentinelstation/workflows/Tests/badge.svg)![Build Project](https://github.com/sentinelstation/sentinelstation/workflows/Build%20Project/badge.svg)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+![Tests](https://github.com/unitystation/unitystation/workflows/Tests/badge.svg)![Build Project](https://github.com/unitystation/unitystation/workflows/Build%20Project/badge.svg?branch=develop)
+[![GitHub last commit](https://img.shields.io/github/last-commit/unitystation/unitystation.svg)](https://github.com/unitystation/unitystation/commits/develop) [![Krihelimeter](http://www.krihelinator.xyz/badge/unitystation/unitystation)](http://www.krihelinator.xyz/repositories/unitystation/unitystation) [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 <br>
 ![built-with-resentment](http://forthebadge.com/images/badges/built-with-resentment.svg) ![contains-technical-debt](http://forthebadge.com/images/badges/contains-technical-debt.svg)<br />
 
 _Unitystation has been active since late 2016_
 
 Visit us on Steam:<br>
-[<img src="https://user-images.githubusercontent.com/7613738/35184899-b6a0aa8e-fdfb-11e7-91a8-bad8f19937b4.jpg" width="300">](http://store.steampowered.com/app/801140/Unitystation/) 
+[<img src="https://user-images.githubusercontent.com/7613738/35184899-b6a0aa8e-fdfb-11e7-91a8-bad8f19937b4.jpg" width="300">](http://store.steampowered.com/app/801140/Unitystation/)
 
 See project updates on Patreon:<br>
 [<img src="https://vignette.wikia.nocookie.net/everyone-else-is-a-returnee/images/6/68/Patreon.png/revision/latest?cb=20161230133220&format=original" width="150">](https://www.patreon.com/unitystation)

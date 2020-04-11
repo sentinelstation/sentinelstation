@@ -297,7 +297,7 @@ namespace Mirror
                 payload = writer.ToArraySegment()
             };
 
-            if(conn != null) conn.Send(message, channelId);
+            conn.Send(message, channelId);
         }
 
         /// <summary>
@@ -626,12 +626,8 @@ namespace Mirror
         /// <param name="dirtyBit">Bit mask to set.</param>
         public void SetDirtyBit(ulong dirtyBit)
         {
-	        if (netIdentity != null)
-	        {
-		        netIdentity.isDirty = true;
-	        }
-
-	        syncVarDirtyBits |= dirtyBit;
+	        netIdentity.isDirty = true;
+            syncVarDirtyBits |= dirtyBit;
         }
 
         /// <summary>

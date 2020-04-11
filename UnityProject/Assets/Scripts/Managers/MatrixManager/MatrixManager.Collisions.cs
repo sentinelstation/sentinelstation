@@ -364,23 +364,8 @@ public partial class MatrixManager
 			//TilemapDamage
 			ApplyTilemapDamage( victimMatrix, cellPos, 9001, worldPos);
 
-			//Integrity
+//			//Integrity
 			ApplyIntegrityDamage( victimMatrix, cellPos, 9001 );
-
-			//Underfloor
-			RemoveUnderfloor(victimMatrix, cellPos);
-		}
-
-		void RemoveUnderfloor(MatrixInfo matrix, Vector3Int cellPos)
-		{
-			var Node = matrix.Matrix.GetMetaDataNode(cellPos);
-			if (Node != null)
-			{
-				foreach (var electricalData in Node.ElectricalData)
-				{
-					electricalData.InData.DestroyThisPlease();
-				}
-			}
 		}
 
 		void ApplyTilemapDamage( MatrixInfo matrix, Vector3Int cellPos, float damage, Vector3Int worldPos )
@@ -390,7 +375,7 @@ public partial class MatrixManager
 			{
 				foreach ( var damageableLayer in matrix.MetaTileMap.LayersValues )
 				{
-					matrix.TileChangeManager.RemoveTile( cellPos, damageableLayer.LayerType);
+					matrix.TileChangeManager.RemoveTile( cellPos, damageableLayer.LayerType );
 				}
 			}
 		}

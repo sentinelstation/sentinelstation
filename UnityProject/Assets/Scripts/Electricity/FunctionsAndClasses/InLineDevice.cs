@@ -7,52 +7,69 @@ using Mirror;
 public class InLineDevice : ElectricalOIinheritance
 {
 	//What is the purpose of inline device, It is to modify current, resistance going over the device E.G a Transformer For any other device that can be thought of
-	public override void ResistanceInput(ResistanceWrap Resistance,
-										ElectricalOIinheritance SourceInstance,
-										IntrinsicElectronicData ComingFrom)
-	{
 
+	public RegisterObject registerTile3;
+	private Matrix matrix => registerTile3.Matrix;
+	private Vector3 posCache;
+	private bool isSupplying = false;
+
+	public override void FindPossibleConnections()
+	{
+		Data.connections.Clear();
+		Data.connections = ElectricityFunctions.FindPossibleConnections(
+			transform.localPosition,
+			matrix,
+			InData.CanConnectTo,
+			GetConnPoints(),
+			this
+		);
+		if (Data.connections.Count > 0)
+		{
+			connected = true;
+		}
+	}
+
+	public override void OnStartServer()
+	{
+		base.OnStartServer();
+		InData.ElectricityOverride = true;
+		InData.ResistanceOverride = true;
+		//Not working for some reason:
+		registerTile3 = gameObject.GetComponent<RegisterObject>();
+		StartCoroutine(WaitForLoad());
+		posCache = transform.localPosition;
+	}
+
+	IEnumerator WaitForLoad()
+	{
+		yield return WaitFor.Seconds(2f);
+		FindPossibleConnections();
+	}
+
+	public override void ResistanceInput(float Resistance, GameObject SourceInstance, ElectricalOIinheritance ComingFrom)
+	{
 		Resistance = InData.ControllingDevice.ModifyResistanceInput(Resistance, SourceInstance, ComingFrom);
-		if (Logall)
-		{
-			Logger.Log("this > " + this + "ResistanceInput, Resistance > " + Resistance + " SourceInstance  > " + SourceInstance + " ComingFrom > " + ComingFrom, Category.Electrical);
-		}
-		InputOutputFunctions.ResistanceInput(Resistance, SourceInstance, ComingFrom, InData);
+		InputOutputFunctions.ResistanceInput(Resistance, SourceInstance, ComingFrom, this);
 	}
 
-	public override void ResistancyOutput(ResistanceWrap Resistance,ElectricalOIinheritance SourceInstance)
+	public override void ResistancyOutput(GameObject SourceInstance)
 	{
-		Resistance = InData.ControllingDevice.ModifyResistancyOutput( Resistance, SourceInstance );
-		if (Logall)
-		{
-			Logger.Log("this > " + this + "ResistancyOutput, Resistance > " + Resistance + " SourceInstance  > " + SourceInstance, Category.Electrical);
-		}
-		InputOutputFunctions.ResistancyOutput(Resistance, SourceInstance, InData);
+		int SourceInstanceID = SourceInstance.GetInstanceID();
+		float Resistance = ElectricityFunctions.WorkOutResistance(Data.SupplyDependent[SourceInstanceID].ResistanceComingFrom);
+		Resistance = InData.ControllingDevice.ModifyResistancyOutput( Resistance, SourceInstance);
+		InputOutputFunctions.ResistancyOutput( Resistance, SourceInstance, this);
 	}
 
-	public override void ElectricityInput(VIRCurrent Current,
-										 ElectricalOIinheritance SourceInstance,
-										 IntrinsicElectronicData ComingFrom)
+	public override void ElectricityInput(float Current, GameObject SourceInstance, ElectricalOIinheritance ComingFrom)
 	{
 		Current = InData.ControllingDevice.ModifyElectricityInput( Current, SourceInstance, ComingFrom);
-
-		if (Logall)
-		{
-			Logger.Log("this > " + this + "ElectricityInput, Current > " + Current + " SourceInstance  > " + SourceInstance + " ComingFrom > " + ComingFrom, Category.Electrical);
-		}
-		InputOutputFunctions.ElectricityInput(Current, SourceInstance, ComingFrom, InData);
+		InputOutputFunctions.ElectricityInput(Current, SourceInstance, ComingFrom, this);
 	}
 
-	public override void ElectricityOutput(VIRCurrent Current,
-										  ElectricalOIinheritance SourceInstance)
+	public override void ElectricityOutput(float Current, GameObject SourceInstance)
 	{
 		Current = InData.ControllingDevice.ModifyElectricityOutput(Current, SourceInstance);
-		if (Logall)
-		{
-			Logger.Log("this > " + this + "ElectricityOutput, Current > " + Current + " SourceInstance  > " + SourceInstance, Category.Electrical);
-		}
-		InputOutputFunctions.ElectricityOutput(Current, SourceInstance, InData);
-	}
-
-
+		InputOutputFunctions.ElectricityOutput(Current, SourceInstance, this);
+		ElectricityFunctions.WorkOutActualNumbers(this);
+	}		
 }

@@ -8,16 +8,14 @@ public class ElectronicData  { //to Store data about the electrical device
 	
 	/// <summary>
 	/// Stores for each supply how is the supply connected to that Device.
-	/// Supply > Resistance > connections
 	/// </summary>
-	public Dictionary<ElectricalOIinheritance,Dictionary<Resistance, HashSet<IntrinsicElectronicData>>> 
-	ResistanceToConnectedDevices = new Dictionary<ElectricalOIinheritance, Dictionary<Resistance, HashSet<IntrinsicElectronicData>>>();
+	public Dictionary<ElectricalOIinheritance,HashSet<PowerTypeCategory>> ResistanceToConnectedDevices = new Dictionary<ElectricalOIinheritance,HashSet<PowerTypeCategory>>();
 
-	public Dictionary<ElectricalOIinheritance, ElectronicSupplyData> SupplyDependent = new Dictionary<ElectricalOIinheritance, ElectronicSupplyData>();
+	public Dictionary<int, ElectronicSupplyData> SupplyDependent = new Dictionary<int, ElectronicSupplyData>();
 	/// <summary>
 	/// The things connected in the vicinity of this
 	/// </summary>
-	public HashSet<IntrinsicElectronicData> connections = new HashSet<IntrinsicElectronicData>();
+	public HashSet<ElectricalOIinheritance> connections = new HashSet<ElectricalOIinheritance> ();
 	public float CurrentInWire;
 	public float ActualVoltage;
 	public float EstimatedResistance;

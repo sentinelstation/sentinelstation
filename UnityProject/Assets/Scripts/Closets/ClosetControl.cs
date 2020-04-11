@@ -298,16 +298,16 @@ public class ClosetControl : NetworkBehaviour, ICheckedInteractable<HandApply> ,
 		{
 			if(serverHeldPlayers.Count > 0 && registerTile.closetType == ClosetType.SCANNER)
 			{
-				statusSync = ClosetStatus.ClosedWithOccupant;
+				SyncStatus(statusSync, ClosetStatus.ClosedWithOccupant);
 			}
 			else
 			{
-				statusSync = ClosetStatus.Closed;
+				SyncStatus(statusSync, ClosetStatus.Closed);
 			}
 		}
 		else
 		{
-			statusSync = ClosetStatus.Open;
+			SyncStatus(statusSync, ClosetStatus.Open);
 		}
 
 	}
@@ -358,7 +358,7 @@ public class ClosetControl : NetworkBehaviour, ICheckedInteractable<HandApply> ,
 	[Server]
 	public void ServerToggleLocked(bool? nowLocked = null)
 	{
-		isLocked = nowLocked.GetValueOrDefault(!IsLocked);
+		SyncLocked(isLocked, nowLocked.GetValueOrDefault(!IsLocked));
 	}
 
 	private void SyncLocked(bool oldValue, bool value)
@@ -522,7 +522,7 @@ public class ClosetControl : NetworkBehaviour, ICheckedInteractable<HandApply> ,
 			player.parentContainer = null;
 
 			//Stop tracking closet
-			FollowCameraMessage.Send(player.gameObject, player.gameObject);
+			FollowCameraMessage.Send(player.gameObject, null);
 		}
 		serverHeldPlayers = new List<ObjectBehaviour>();
 	}
