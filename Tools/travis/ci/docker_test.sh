@@ -10,4 +10,4 @@ docker run \
   -w /project/ \
   -v $(pwd):/project/ \
   $IMAGE_NAME \
-  /bin/bash -c "/project/ci/before_script.sh && /project/ci/test.sh"
+  /bin/bash -c "/project/Tools/travis/ci/before_script.sh && /project/Tools/travis/ci/test.sh"
