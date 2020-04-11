@@ -12,9 +12,7 @@ public class LowVoltageCable : CableInheritance
 		PowerTypeCategory.SolarPanel,
 		PowerTypeCategory.PowerSink,
 	};
-
-
-	void Awake()
+	public override void _OnStartServer()
 	{
 		ApplianceType = PowerTypeCategory.LowVoltageCable;
 		CableType = WiringColor.low;

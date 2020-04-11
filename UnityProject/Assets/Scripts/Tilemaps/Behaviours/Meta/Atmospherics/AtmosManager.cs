@@ -38,6 +38,14 @@ public class AtmosManager : MonoBehaviour
 		}
 	}
 
+	private void Start()
+	{
+		if (Mode != AtmosMode.Manual)
+		{
+			StartSimulation();
+		}
+	}
+
 	private void Update()
 	{
 		if (Mode == AtmosMode.GameLoop && Running)
@@ -96,10 +104,6 @@ public class AtmosManager : MonoBehaviour
 
 	void OnRoundStart()
 	{
-		if (Mode != AtmosMode.Manual)
-		{
-			StartSimulation();
-		}
 		StartCoroutine(SetPipes());
 	}
 
@@ -128,8 +132,6 @@ public class AtmosManager : MonoBehaviour
 
 	public void StartSimulation()
 	{
-		if (!CustomNetworkManager.Instance._isServer) return;
-
 		Running = true;
 
 		if (Mode == AtmosMode.Threaded)
@@ -141,8 +143,6 @@ public class AtmosManager : MonoBehaviour
 
 	public void StopSimulation()
 	{
-		if (!CustomNetworkManager.Instance._isServer) return;
-
 		Running = false;
 
 		AtmosThread.Stop();

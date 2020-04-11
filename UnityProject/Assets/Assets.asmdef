@@ -6,8 +6,7 @@
         "Unity.TextMeshPro",
         "Chemistry",
         "YamlDotNet",
-        "SerializableDictionary",
-        "NaughtyAttributes.Core"
+        "SerializableDictionary"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

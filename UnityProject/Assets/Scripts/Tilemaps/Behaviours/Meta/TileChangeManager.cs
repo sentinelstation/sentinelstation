@@ -42,7 +42,7 @@ public class TileChangeManager : NetworkBehaviour
 		var dataList = JsonUtility.FromJson<TileChangeList>(data);
 		foreach (TileChangeEntry entry in dataList.List)
 		{
-			Logger.LogTraceFormat("Received update for {0} layer {1} " + entry.TileName , Category.TileMaps, entry.Position,
+			Logger.LogTraceFormat("Received update for {0} layer {1}", Category.TileMaps, entry.Position,
 				entry.LayerType);
 			// load tile & apply
 			if (entry.TileType.Equals(TileType.None))
@@ -80,14 +80,11 @@ public class TileChangeManager : NetworkBehaviour
 
 
 	[Server]
-	public void UpdateTile(Vector3Int cellPosition, LayerTile layerTile, bool SetTileServer = true)
+	public void UpdateTile(Vector3Int cellPosition, LayerTile layerTile)
 	{
 		if (IsDifferent(cellPosition, layerTile))
 		{
-			if (SetTileServer)
-			{
-				InternalUpdateTile(cellPosition, layerTile);
-			}
+			InternalUpdateTile(cellPosition, layerTile);
 
 			RpcUpdateTile(cellPosition, layerTile.TileType, layerTile.name);
 
@@ -140,19 +137,6 @@ public class TileChangeManager : NetworkBehaviour
 	[Server]
 	public LayerTile RemoveTile(Vector3Int cellPosition, LayerType layerType, bool removeAll=true)
 	{
-		/*if (layerType == LayerType.Underfloor)
-		{
-			var matrix = metaTileMap.Layers[LayerType.Underfloor].matrix;
-			var metaDataNode = matrix.GetMetaDataNode(cellPosition);
-
-			if (metaDataNode.ElectricalData.Count > 0)
-			{
-				cellPosition = metaDataNode.ElectricalData[0].NodeLocation;
-				metaDataNode.ElectricalData[0].InData.DestroyThisPlease();
-				removeAll = false;
-			}
-		}*/
-
 		var layerTile = metaTileMap.GetTile(cellPosition, layerType);
 		if(metaTileMap.HasTile(cellPosition, layerType, true))
 		{
@@ -162,7 +146,7 @@ public class TileChangeManager : NetworkBehaviour
 
 			AddToChangeList(cellPosition, layerType);
 
-			if (layerType == LayerType.Floors || layerType == LayerType.Base )
+			if ( layerType == LayerType.Floors || layerType == LayerType.Base )
 			{
 				OnFloorOrPlatingRemoved.Invoke( cellPosition );
 			}
@@ -237,15 +221,12 @@ public class TileChangeManager : NetworkBehaviour
 
 		//TODO: OVERLAYS - right now it only removes at z = -1, but we will eventually need
 		//to allow multiple overlays on a given location which would require multiple z levels.
-		if (layerTile.TileType != TileType.UnderFloor)
+		if (position.z == 0)
 		{
-			if (position.z == 0)
+			position.z = -1;
+			if (metaTileMap.HasTile(position, layerTile.LayerType, true))
 			{
-				position.z = -1;
-				if (metaTileMap.HasTile(position, layerTile.LayerType, true))
-				{
-					metaTileMap.RemoveTile(position, layerTile.LayerType);
-				}
+				metaTileMap.RemoveTile(position, layerTile.LayerType);
 			}
 		}
 	}

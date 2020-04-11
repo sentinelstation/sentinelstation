@@ -31,8 +31,8 @@ public class Tools : Editor
 			var c = new Conn
 			{
 				worldPos = w.transform.position,
-				wireEndA = w.InData.WireEndA,
-				wireEndB = w.InData.WireEndB,
+				wireEndA = w.WireEndA,
+				wireEndB = w.WireEndB,
 				wireType = cable.ApplianceType
 			};
 
