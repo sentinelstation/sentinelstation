@@ -62,10 +62,14 @@ echo "$NEWHASH" > ./latest_hash.txt
 #bye
 #EOF
 
-curl -T ./Sentinelstation.zip -u "$CDN_USERNAME:$CDN_PASSWORD" "ftp://$CDN_HOST:21/${UPLOAD_FOLDER}/${NEWVER}.zip"
-curl "ftp://$CDN_HOST:21/latest_hash_${TARGET}.txt" -u "$CDN_USERNAME:$CDN_PASSWORD" -Q "rm /latest_hash_${TARGET}.txt"
-curl -T ./latest_hash_${TARGET}.txt -u "$CDN_USERNAME:$CDN_PASSWORD" "ftp://$CDN_HOST:21/latest_hash_${TARGET}.txt"
-curl "ftp://$CDN_HOST:21/latest_hash.txt" -u "$CDN_USERNAME:$CDN_PASSWORD" -Q "rm /latest_hash.txt"
-curl -T ./latest_hash.txt -u "$CDN_USERNAME:$CDN_PASSWORD" "ftp://$CDN_HOST:21/latest_hash.txt" 
-curl "ftp://$CDN_HOST:21/latest.txt" -u "$CDN_USERNAME:$CDN_PASSWORD" -Q "rm /latest.txt"
-curl -T ./latest.txt -u "$CDN_USERNAME:$CDN_PASSWORD" "ftp://$CDN_HOST:21/latest.txt"
+zip -qq -r Build.zip .
+
+curl -s -T ./Build.zip -u "$CDN_USERNAME:$CDN_PASSWORD" "ftp://$CDN_HOST:21/${UPLOAD_FOLDER}/${NEWVER}.zip"
+curl -s "ftp://$CDN_HOST:21/latest_hash_${TARGET}.txt" -u "$CDN_USERNAME:$CDN_PASSWORD" -Q "rm /latest_hash_${TARGET}.txt"
+curl -s -T ./latest_hash_${TARGET}.txt -u "$CDN_USERNAME:$CDN_PASSWORD" "ftp://$CDN_HOST:21/latest_hash_${TARGET}.txt"
+curl -s "ftp://$CDN_HOST:21/latest_hash.txt" -u "$CDN_USERNAME:$CDN_PASSWORD" -Q "rm /latest_hash.txt"
+curl -s -T ./latest_hash.txt -u "$CDN_USERNAME:$CDN_PASSWORD" "ftp://$CDN_HOST:21/latest_hash.txt" 
+curl -s "ftp://$CDN_HOST:21/latest.txt" -u "$CDN_USERNAME:$CDN_PASSWORD" -Q "rm /latest.txt"
+curl -s -T ./latest.txt -u "$CDN_USERNAME:$CDN_PASSWORD" "ftp://$CDN_HOST:21/latest.txt"
+
+rm ./Build.zip
