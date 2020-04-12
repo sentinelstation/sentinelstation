@@ -42,21 +42,30 @@ else
 fi
 
 cd $BUILD_FOLDER
+echo "$(ls)"
 
 echo "$NEWVER" > ./latest.txt
 echo "$NEWHASH" > ./latest_hash_${TARGET}.txt
+echo "$NEWHASH" > ./latest_hash.txt
 
-ftp -invp <<EOF
-open $CDN_HOST
-user $CDN_USERNAME $CDN_PASSWORD
-binary
-put "./Sentinelstation.zip" "${UPLOAD_FOLDER}/${NEWVER}.zip"
-rm "latest_hash_${TARGET}.txt"
-put "./latest_hash_${TARGET}.txt" "latest_hash_${TARGET}.txt"
-rm "latest_hash.txt" "latest_hash.txt"
-put "./latest_hash.txt" "latest_hash.txt"
-rm "latest.txt"
-put "./latest.txt" "latest.txt"
-bye
-EOF
+#ftp -invp <<EOF
+#open $CDN_HOST
+#user $CDN_USERNAME $CDN_PASSWORD
+#binary
+#put "./Sentinelstation.zip" "${UPLOAD_FOLDER}/${NEWVER}.zip"
+#rm "latest_hash_${TARGET}.txt"
+#put "./latest_hash_${TARGET}.txt" "latest_hash_${TARGET}.txt"
+#rm "latest_hash.txt" "latest_hash.txt"
+#put "./latest_hash.txt" "latest_hash.txt"
+#rm "latest.txt"
+#put "./latest.txt" "latest.txt"
+#bye
+#EOF
 
+curl -p - --insecure  "ftp://$CDN_HOST:21/${UPLOAD_FOLDER}/${NEWVER}.zip" --user "$CDN_USERNAME:$CDN_PASSWORD" -T "Sentinelstation.zip" --ftp-create-dirs
+curl -p - --insecure  "ftp://$CDN_HOST:21/latest_hash_${TARGET}.txt" --user "$CDN_USERNAME:$CDN_PASSWORD" -Q "–DELE  /latest_hash_${TARGET}.txt" --ftp-create-dirs
+curl -p - --insecure  "ftp://$CDN_HOST:21/latest_hash_${TARGET}.txt" --user "$CDN_USERNAME:$CDN_PASSWORD" -T "latest_hash_${TARGET}.txt" --ftp-create-dirs
+curl -p - --insecure  "ftp://$CDN_HOST:21/latest_hash.txt" --user "$CDN_USERNAME:$CDN_PASSWORD" -Q "–DELE  /latest_hash.txt" --ftp-create-dirs
+curl -p - --insecure  "ftp://$CDN_HOST:21/latest_hash.txt" --user "$CDN_USERNAME:$CDN_PASSWORD" -T "latest_hash.txt" --ftp-create-dirs
+curl -p - --insecure  "ftp://$CDN_HOST:21/latest.txt" --user "$CDN_USERNAME:$CDN_PASSWORD" -Q "–DELE  /latest.txt" --ftp-create-dirs
+curl -p - --insecure  "ftp://$CDN_HOST:21/latest.txt" --user "$CDN_USERNAME:$CDN_PASSWORD" -T "latest.txt" --ftp-create-dirs
