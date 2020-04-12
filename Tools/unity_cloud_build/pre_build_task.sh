@@ -55,12 +55,23 @@ CDN_PATH_LIN=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev
 CDN_PATH_OSX=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev/StandaloneOSX/%s.zip" $NEWVER)
 
 # Ensure the config and buildversion are properly set.
-curl -L "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux32" --output jq
-chmod +x ./jq
+BUILDINFO=$(cat <<-END
+{
+    "BuildNumber": $NEWVER,
+    "ForkName": "SentinelStationDev"
+}
+END
+)
 
-./jq --arg v "$NEWVER" '.BuildNumber = $v' $BUILDINFO_PATH | sponge $BUILDINFO_PATH
-./jq --arg v "SentinelStationDev" '.ForkName = $v' $BUILDINFO_PATH | sponge $BUILDINFO_PATH
-./jq --arg v "$CDN_PATH_WIN" '.WinDownload = $v' $CONFIG_PATH | sponge $CONFIG_PATH
-./jq --arg v "$CDN_PATH_OSX" '.OSXDownload = $v' $CONFIG_PATH | sponge $CONFIG_PATH
-./jq --arg v "$CDN_PATH_LIN" '.LinuxDownload = $v' $CONFIG_PATH | sponge $CONFIG_PATH
+CONFIG=$(cat <<-END
+{
+    "RconPort": 7778
+    "WinDownload": "$CDN_PATH_WIN",
+    "OSXDownload": "$CDN_PATH_OSX",
+    "LinuxDownload": "$CDN_PATH_LIN"
+}
+END
+)
 
+printf "%s" "$BUILDINFO" > "$BUILDINFO_PATH"
+printf "%s" "$CONFIG" > "$CONFIG_PATH"

@@ -43,20 +43,20 @@ fi
 
 cd $BUILD_FOLDER
 
-echo "${NEWVER}" > ./latest.txt
-echo "${NEWHASH}" > ./latest_hash_${TARGET}.txt
+echo "$NEWVER" > ./latest.txt
+echo "$NEWHASH" > ./latest_hash_${TARGET}.txt
 
 ftp -invp <<EOF
 open $CDN_HOST
 user $CDN_USERNAME $CDN_PASSWORD
 binary
 put "./Sentinelstation.zip" "${UPLOAD_FOLDER}/${NEWVER}.zip"
-rm "latest.txt"
-put "./latest.txt" "latest.txt"
 rm "latest_hash_${TARGET}.txt"
 put "./latest_hash_${TARGET}.txt" "latest_hash_${TARGET}.txt"
 rm "latest_hash.txt" "latest_hash.txt"
 put "./latest_hash.txt" "latest_hash.txt"
+rm "latest.txt"
+put "./latest.txt" "latest.txt"
 bye
 EOF
 
