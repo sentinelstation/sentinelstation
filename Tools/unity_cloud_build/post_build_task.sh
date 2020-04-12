@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # Preping deploy logic
-CDNVER=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest.txt?r=$RANDOM")
-CDNHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash.txt?r=$RANDOM")
-CDNTARGETHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_$TARGET.txt?r=$RANDOM")
+CDNVER=$(curl -s "https://SentinelStationFiles.b-cdn.net/latest.txt?r=$RANDOM")
+CDNHASH=$(curl -s "https://SentinelStationFiles.b-cdn.net/latest_hash.txt?r=$RANDOM")
+CDNTARGETHASH=$(curl -s "https://SentinelStationFiles.b-cdn.net/latest_hash_$TARGET.txt?r=$RANDOM")
 
 NEWHASH=$(git rev-parse --short HEAD)
 
-CDNWINHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_standalonewindows64.txt?r=$RANDOM")
-CDNOSXHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_standaloneosxuniversal.txt?r=$RANDOM")
-CDNLINHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_standalonelinux64.txt?r=$RANDOM")
+CDNWINHASH=$(curl -s "https://SentinelStationFiles.b-cdn.net/latest_hash_standalonewindows64.txt?r=$RANDOM")
+CDNOSXHASH=$(curl -s "https://SentinelStationFiles.b-cdn.net/latest_hash_standaloneosxuniversal.txt?r=$RANDOM")
+CDNLINHASH=$(curl -s "https://SentinelStationFiles.b-cdn.net/latest_hash_standalonelinux64.txt?r=$RANDOM")
 
 # If another build with this hash completed and uploaded before this one, then it already updated latest.txt and we should not increment it.
 if [ "$CDNWINHASH" = "$NEWHASH" ] || [ "$CDNOSXHASH" = "$NEWHASH" ] || [ "$CDNLINHASH" = "$NEWHASH" ]; then

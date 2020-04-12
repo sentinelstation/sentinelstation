@@ -1,10 +1,42 @@
 #!/bin/bash
 
-CDNVER=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest.txt?r=$RANDOM")
+sponge () (
+    append=false
 
-CDNWINHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_standalonewindows64.txt?r=$RANDOM")
-CDNOSXHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_standaloneosxuniversal.txt?r=$RANDOM")
-CDNLINHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_standalonelinux64.txt?r=$RANDOM")
+    while getopts 'a' opt; do
+        case $opt in
+            a) append=true ;;
+            *) echo error; exit 1
+        esac
+    done
+    shift "$(( OPTIND - 1 ))"
+
+    outfile=$1
+
+    tmpfile=$(mktemp "$(dirname "$outfile")/tmp-sponge.XXXXXXXX") &&
+    cat >"$tmpfile" &&
+    if "$append"; then
+        cat "$tmpfile" >>"$outfile"
+    else
+        if [ -f "$outfile" ]; then
+            chmod --reference="$outfile" "$tmpfile"
+        fi
+        if [ -f "$outfile" ]; then
+            mv "$tmpfile" "$outfile"
+        elif [ -n "$outfile" ] && [ ! -e "$outfile" ]; then
+            cat "$tmpfile" >"$outfile"
+        else
+            cat "$tmpfile"
+        fi
+    fi &&
+    rm -f "$tmpfile"
+)
+
+CDNVER=$(curl -s "https://SentinelStationFiles.b-cdn.net/latest.txt?r=$RANDOM")
+
+CDNWINHASH=$(curl -s "https://SentinelStationFiles.b-cdn.net/latest_hash_standalonewindows64.txt?r=$RANDOM")
+CDNOSXHASH=$(curl -s "https://SentinelStationFiles.b-cdn.net/latest_hash_standaloneosxuniversal.txt?r=$RANDOM")
+CDNLINHASH=$(curl -s "https://SentinelStationFiles.b-cdn.net/latest_hash_standalonelinux64.txt?r=$RANDOM")
 
 NEWHASH=$(git rev-parse --short HEAD)
 
@@ -23,10 +55,11 @@ CDN_PATH_LIN=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev
 CDN_PATH_OSX=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev/StandaloneOSX/%s.zip" $NEWVER)
 
 # Ensure the config and buildversion are properly set.
-sudo apt-get install moreutils
-jq --arg v "$NEWVER" '.BuildNumber = $v' $BUILDINFO_PATH | sponge $BUILDINFO_PATH
-jq --arg v "SentinelStationDev" '.ForkName = $v' $BUILDINFO_PATH | sponge $BUILDINFO_PATH
-jq --arg v "$CDN_PATH_WIN" '.WinDownload = $v' $CONFIG_PATH | sponge $CONFIG_PATH
-jq --arg v "$CDN_PATH_OSX" '.OSXDownload = $v' $CONFIG_PATH | sponge $CONFIG_PATH
-jq --arg v "$CDN_PATH_LIN" '.LinuxDownload = $v' $CONFIG_PATH | sponge $CONFIG_PATH
+curl "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64" --output jq
+
+./jq --arg v "$NEWVER" '.BuildNumber = $v' $BUILDINFO_PATH | sponge $BUILDINFO_PATH
+./jq --arg v "SentinelStationDev" '.ForkName = $v' $BUILDINFO_PATH | sponge $BUILDINFO_PATH
+./jq --arg v "$CDN_PATH_WIN" '.WinDownload = $v' $CONFIG_PATH | sponge $CONFIG_PATH
+./jq --arg v "$CDN_PATH_OSX" '.OSXDownload = $v' $CONFIG_PATH | sponge $CONFIG_PATH
+./jq --arg v "$CDN_PATH_LIN" '.LinuxDownload = $v' $CONFIG_PATH | sponge $CONFIG_PATH
 
