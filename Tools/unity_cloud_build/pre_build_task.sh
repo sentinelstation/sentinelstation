@@ -47,15 +47,15 @@ else
     NEWVER=$(($CDNVER + 1))
 fi
 
-BUILDINFO_PATH="Assets/StreamingAssets/buildinfo.json"
-CONFIG_PATH="Assets/StreamingAssets/config/config.json"
+BUILDINFO_PATH="UnityProject/Assets/StreamingAssets/buildinfo.json"
+CONFIG_PATH="UnityProject/Assets/StreamingAssets/config/config.json"
 
 CDN_PATH_WIN=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev/StandaloneWindows64/%s.zip" $NEWVER)
 CDN_PATH_LIN=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev/StandaloneLinux64/%s.zip" $NEWVER)
 CDN_PATH_OSX=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev/StandaloneOSX/%s.zip" $NEWVER)
 
 # The lack of documentation for UCB is baffling.
-echo "Working Directory: $(pwd)"
+# echo "Working Directory: $(pwd)"
 
 # Ensure the config and buildversion are properly set.
 BUILDINFO=$(cat <<-END
