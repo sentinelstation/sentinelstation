@@ -3,6 +3,7 @@
 CDNVER=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest.txt?r=$RANDOM")
 NEWVER=$(($CDNVER + 1))
 
+
 BUILDINFO_PATH="Assets/StreamingAssets/buildinfo.json"
 CONFIG_PATH="Assets/StreamingAssets/config/config.json"
 
