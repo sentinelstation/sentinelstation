@@ -56,6 +56,7 @@ CDN_PATH_OSX=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev
 
 # Ensure the config and buildversion are properly set.
 curl "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64" --output jq
+chmod +x ./jq
 
 ./jq --arg v "$NEWVER" '.BuildNumber = $v' $BUILDINFO_PATH | sponge $BUILDINFO_PATH
 ./jq --arg v "SentinelStationDev" '.ForkName = $v' $BUILDINFO_PATH | sponge $BUILDINFO_PATH
