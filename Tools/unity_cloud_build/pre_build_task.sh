@@ -54,6 +54,9 @@ CDN_PATH_WIN=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev
 CDN_PATH_LIN=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev/StandaloneLinux64/%s.zip" $NEWVER)
 CDN_PATH_OSX=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev/StandaloneOSX/%s.zip" $NEWVER)
 
+# The lack of documentation for UCB is baffling.
+echo "Working Directory: $(pwd)"
+
 # Ensure the config and buildversion are properly set.
 BUILDINFO=$(cat <<-END
 {
