@@ -12,7 +12,7 @@ CDNOSXHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_stand
 CDNLINHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_standalonelinux64.txt?r=$RANDOM")
 
 # If another build with this hash completed and uploaded before this one, then it already updated latest.txt and we should not increment it.
-if [ $CDNWINHASH = $NEWHASH || $CDNOSXHASH = $NEWHASH || $CDNLINHASH = $NEWHASH ]; then
+if [ "$CDNWINHASH" = "$NEWHASH" ] || [ "$CDNOSXHASH" = "$NEWHASH" ] || [ "$CDNLINHASH" = "$NEWHASH" ]; then
     NEWVER=$CDNVER
 else
     NEWVER=$(($CDNVER + 1))

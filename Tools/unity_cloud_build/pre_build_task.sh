@@ -1,8 +1,19 @@
 #!/bin/bash
 
 CDNVER=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest.txt?r=$RANDOM")
-NEWVER=$(($CDNVER + 1))
 
+CDNWINHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_standalonewindows64.txt?r=$RANDOM")
+CDNOSXHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_standaloneosxuniversal.txt?r=$RANDOM")
+CDNLINHASH=$(wget -qO- "https://SentinelStationFiles.b-cdn.net/latest_hash_standalonelinux64.txt?r=$RANDOM")
+
+NEWHASH=$(git rev-parse --short HEAD)
+
+# If another build with this hash completed and uploaded before this one, then it already updated latest.txt and we should not increment it.
+if [ "$CDNWINHASH" = "$NEWHASH" ] || [ "$CDNOSXHASH" = "$NEWHASH" ] || [ "$CDNLINHASH" = "$NEWHASH" ]; then
+    NEWVER=$CDNVER
+else
+    NEWVER=$(($CDNVER + 1))
+fi
 
 BUILDINFO_PATH="Assets/StreamingAssets/buildinfo.json"
 CONFIG_PATH="Assets/StreamingAssets/config/config.json"
