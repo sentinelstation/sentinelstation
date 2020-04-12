@@ -55,7 +55,7 @@ CDN_PATH_LIN=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev
 CDN_PATH_OSX=$(printf "https://SentinelStationFiles.b-cdn.net/SentinelStationDev/StandaloneOSX/%s.zip" $NEWVER)
 
 # Ensure the config and buildversion are properly set.
-curl -L "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64" --output jq
+curl -L "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux32" --output jq
 chmod +x ./jq
 
 ./jq --arg v "$NEWVER" '.BuildNumber = $v' $BUILDINFO_PATH | sponge $BUILDINFO_PATH
