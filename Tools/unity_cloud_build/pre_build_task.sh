@@ -68,7 +68,7 @@ END
 
 CONFIG=$(cat <<-END
 {
-    "RconPort": 7778
+    "RconPort": 7778,
     "WinDownload": "$CDN_PATH_WIN",
     "OSXDownload": "$CDN_PATH_OSX",
     "LinuxDownload": "$CDN_PATH_LIN"
