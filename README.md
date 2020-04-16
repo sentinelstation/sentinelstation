@@ -17,7 +17,7 @@ Please join us on Discord:<br>
 [<img src="https://www.seoclerk.com/pics/want57772-1PlHGI1515438378.png" width="75">](https://discord.gg/H6EunER)
 
 ## Feel like getting involved?
-Read our Quick Start guide [here](https://github.com/unitystation/unitystation/wiki/Starting-contribution)
+Read our Quick Start guide [here](https://unitystation.github.io/unitystation/contribution-guides/Starting-contribution/)
 1. [Get Unity Hub](https://unity3d.com/get-unity/download)
 2. Install editor version **2019.3.8f1**
 3. Fork the repo
