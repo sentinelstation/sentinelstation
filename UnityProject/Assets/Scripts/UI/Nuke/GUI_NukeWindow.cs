@@ -16,86 +16,87 @@ public class GUI_NukeWindow : NetTab
 
 	private string InitialInfoText;
 
-	private const string colorGreen = "00E100",
-	colorGrey = "F3FEFF",
-	colorRed = "FF2828";
+	private static readonly Color
+		colorGreen = DebugTools.HexToColor("00E100"),
+		colorGrey = DebugTools.HexToColor("F3FEFF"),
+		colorRed = DebugTools.HexToColor("FF2828");
 
 	//get various ui elements (not the method i would choose, but it works)
-	private NetUIElement infoTimerDisplay;
-	private NetUIElement InfoTimerDisplay
+	private NetUIElement<string> infoTimerDisplay;
+	private NetUIElement<string> InfoTimerDisplay
 	{
 		get
 		{
 			if (!infoTimerDisplay)
 			{
-				infoTimerDisplay = this["NukeTimerLabel"];
+				infoTimerDisplay = (NetUIElement<string>)this["NukeTimerLabel"];
 			}
 			return infoTimerDisplay;
 		}
 	}
 
-	private NetUIElement infoTimerColor;
+	private NetColorChanger infoTimerColor;
 
-	private NetUIElement InfoTimerColor
+	private NetColorChanger InfoTimerColor
 	{
 		get
 		{
 			if (!infoTimerColor)
 			{
-				infoTimerColor = this["TimerNukeToggleColor"] as NetColorChanger;
+				infoTimerColor = (NetColorChanger)this["TimerNukeToggleColor"];
 			}
 			return infoTimerColor;
 		}
 	}
 
-	private NetUIElement infoAnchorColor;
-	private NetUIElement InfoAnchorColor
+	private NetColorChanger infoAnchorColor;
+	private NetColorChanger InfoAnchorColor
 	{
 		get
 		{
 			if (!infoAnchorColor)
 			{
-				infoAnchorColor = this["AnchorNukeToggleColor"] as NetColorChanger;
+				infoAnchorColor = (NetColorChanger)this["AnchorNukeToggleColor"];
 			}
 			return infoAnchorColor;
 		}
 	}
 
 
-	private NetUIElement infoSafetyColor;
-	private NetUIElement InfoSafetyColor
+	private NetColorChanger infoSafetyColor;
+	private NetColorChanger InfoSafetyColor
 	{
 		get
 		{
 			if (!infoSafetyColor)
 			{
-				infoSafetyColor = this["SafetyNukeToggleColor"] as NetColorChanger;
+				infoSafetyColor = (NetColorChanger)this["SafetyNukeToggleColor"];
 			}
 			return infoSafetyColor;
 		}
 	}
 
-	private NetUIElement infoNukeDisplay;
-	private NetUIElement InfoNukeDisplay
+	private NetUIElement<string> infoNukeDisplay;
+	private NetUIElement<string> InfoNukeDisplay
 	{
 		get
 		{
 			if (!infoNukeDisplay)
 			{
-				infoNukeDisplay = this["NukeInfoDisplay"];
+				infoNukeDisplay = (NetUIElement<string>)this["NukeInfoDisplay"];
 			}
 			return infoNukeDisplay;
 		}
 	}
-	private NetUIElement codeDisplay;
+	private NetUIElement<string> codeDisplay;
 
-	private NetUIElement CodeDisplay
+	private NetUIElement<string> CodeDisplay
 	{
 		get
 		{
 			if (!codeDisplay)
 			{
-				codeDisplay = this["NukeCodeDisplay"];
+				codeDisplay = (NetUIElement<string>)this["NukeCodeDisplay"];
 			}
 			return codeDisplay;
 		}
@@ -114,15 +115,15 @@ public class GUI_NukeWindow : NetTab
 
 			return nuke;
 		}
-	}	
+	}
 
 	public override void OnEnable()
 	{
 		base.OnEnable();
 		if (CustomNetworkManager.Instance._isServer)
 		{
-			infoNukeDisplay = this["NukeInfoDisplay"];
-			codeDisplay = this["NukeCodeDisplay"];
+			infoNukeDisplay = (NetUIElement<string>)this["NukeInfoDisplay"];
+			codeDisplay = (NetUIElement<string>)this["NukeCodeDisplay"];
 		}
 	}
 
@@ -141,8 +142,8 @@ public class GUI_NukeWindow : NetTab
 			yield return WaitFor.EndOfFrame;
 		}
 
-		InfoTimerDisplay.SetValue = FormatTime(nuke.CurrentTimerSeconds);
-		nuke.OnTimerUpdate.AddListener(timerSeconds => { InfoTimerDisplay.SetValue = FormatTime(timerSeconds); });
+		InfoTimerDisplay.SetValueServer(FormatTime(nuke.CurrentTimerSeconds));
+		nuke.OnTimerUpdate.AddListener(timerSeconds => { InfoTimerDisplay.SetValueServer(FormatTime(timerSeconds)); });
 
 		Logger.Log(nameof(WaitForProvider), Category.NetUI);
 	}
@@ -154,12 +155,12 @@ public class GUI_NukeWindow : NetTab
 		{
 			//	Logger.Log( $"{name} Kinda init. Nuke code is {NukeInteract.NukeCode}" );
 			InitialInfoText = $"Enter {Nuke.NukeCode.ToString().Length}-digit code:";
-			InfoNukeDisplay.SetValue = "Insert the disk!";
+			InfoNukeDisplay.SetValueServer("Insert the disk!");
 			if(!Nuke.IsAncharable)
 			{
-				InfoAnchorColor.SetValue = colorGrey;
+				InfoAnchorColor.SetValueServer(colorGrey);
 			}
-			
+
 		}
 	}
 
@@ -175,7 +176,7 @@ public class GUI_NukeWindow : NetTab
 			return;
 		}
 		Nuke.EjectDisk();
-		InfoNukeDisplay.SetValue = "Insert the disk!";
+		InfoNukeDisplay.SetValueServer("Insert the disk!");
 		Clear();
 	}
 
@@ -191,8 +192,8 @@ public class GUI_NukeWindow : NetTab
 		bool? isSafety = Nuke.SafetyNuke();
 		if (isSafety != null)
 		{
-			InfoSafetyColor.SetValue = isSafety.Value ? colorGreen : colorRed;
-			if (isSafety.Value) { InfoTimerColor.SetValue = colorRed; }
+			InfoSafetyColor.SetValueServer(isSafety.Value ? colorGreen : colorRed);
+			if (isSafety.Value) { InfoTimerColor.SetValueServer(colorRed); }
 			this.TryStopCoroutine(ref corHandler);
 			this.StartCoroutine(UpdateDisplay("Safety is: " + (isSafety.Value ? "On" : "Off"), (isSafety.Value ? "Nuke disarmed!" : "Nuke armed!")), ref corHandler);
 		}
@@ -219,7 +220,7 @@ public class GUI_NukeWindow : NetTab
 		bool? isAnchored = Nuke.AnchorNuke();
 		if(isAnchored != null)
 		{
-			InfoAnchorColor.SetValue = isAnchored.Value ? colorRed : colorGreen ;
+			InfoAnchorColor.SetValueServer(isAnchored.Value ? colorRed : colorGreen) ;
 			this.TryStopCoroutine(ref corHandler);
 			this.StartCoroutine(UpdateDisplay("Anchor is: " + (isAnchored.Value ? "Off" : "On"), (isAnchored.Value ? "Nuke position Unlocked!" : "Nuke position Locked!")), ref corHandler);
 		}
@@ -244,13 +245,13 @@ public class GUI_NukeWindow : NetTab
 		{
 			this.TryStopCoroutine(ref corHandler);
 			Clear();
-			InfoTimerColor.SetValue = isTimer.Value ? colorGreen : colorRed;
+			InfoTimerColor.SetValueServer(isTimer.Value ? colorGreen : colorRed);
 			this.TryStopCoroutine(ref corHandler);
 			this.StartCoroutine(UpdateDisplay("Timer is: " + (isTimer.Value ? "On" : "Off"), (isTimer.Value ? "Set countdown timer:" : "Nuclear detonation aborted!")), ref corHandler);
 			if (!isTimer.Value)
 			{
 				//Clear countdown timer upon disabling it
-				InfoTimerDisplay.SetValue = "";
+				InfoTimerDisplay.SetValueServer("");
 			}
 		}
 		else
@@ -271,18 +272,18 @@ public class GUI_NukeWindow : NetTab
 		}
 		if (Nuke.AppendKey(digit))
 		{
-			
+
 			if (!Nuke.IsCodeRight)
 			{
 				int length = Nuke.CurrentCode.Length;
 				//replace older digits with asterisks
 				string newDigit = Nuke.CurrentCode.Substring(length <= 0 ? 0 : length - 1);
-				CodeDisplay.SetValue = newDigit.PadLeft(length, '*');
+				CodeDisplay.SetValueServer(newDigit.PadLeft(length, '*'));
 				StartCoroutine(HideCode());
 			}
 			else
 			{
-				CodeDisplay.SetValue = Nuke.CurrentCode;
+				CodeDisplay.SetValueServer(Nuke.CurrentCode);
 			}
 
 		}
@@ -291,7 +292,7 @@ public class GUI_NukeWindow : NetTab
 	public void Clear()
 	{
 		Nuke.Clear();
-		CodeDisplay.SetValue = "";
+		CodeDisplay.SetValueServer("");
 	}
 
 	public void TryArm()
@@ -316,7 +317,7 @@ public class GUI_NukeWindow : NetTab
 		if (isValid.Value)
 		{
 			Clear();
-			
+
 			if (Nuke.IsTimer && Nuke.IsCodeRight)
 			{
 				this.TryStopCoroutine(ref corHandler);
@@ -329,7 +330,7 @@ public class GUI_NukeWindow : NetTab
 				this.StartCoroutine(UpdateDisplay("Correct code!","Access granted!"), ref corHandler);
 			}
 
-			
+
 		}
 		else
 		{
@@ -369,23 +370,23 @@ public class GUI_NukeWindow : NetTab
 	private IEnumerator HideCode()
 	{
 		yield return WaitFor.Seconds(1);
-		CodeDisplay.SetValue = "".PadLeft(CodeDisplay.Value.Length, '*');
+		CodeDisplay.SetValueServer("".PadLeft(((string)CodeDisplay.ValueObject).Length, '*'));
 	}
 
 	private IEnumerator UpdateDisplay(string strBlink, string strSet = "")
 	{
-		InfoNukeDisplay.SetValue = strBlink;
+		InfoNukeDisplay.SetValueServer(strBlink);
 		yield return WaitFor.Seconds(0.5f);
-		InfoNukeDisplay.SetValue = "";
+		InfoNukeDisplay.SetValueServer("");
 		yield return WaitFor.Seconds(0.5f);
-		InfoNukeDisplay.SetValue = strBlink;
+		InfoNukeDisplay.SetValueServer(strBlink);
 		yield return WaitFor.Seconds(0.5f);
-		InfoNukeDisplay.SetValue = "";
+		InfoNukeDisplay.SetValueServer("");
 		yield return WaitFor.Seconds(0.5f);
-		InfoNukeDisplay.SetValue = strBlink;
+		InfoNukeDisplay.SetValueServer(strBlink);
 		yield return WaitFor.Seconds(0.5f);
 
-		InfoNukeDisplay.SetValue = strSet;
+		InfoNukeDisplay.SetValueServer(strSet);
 	}
 
 }

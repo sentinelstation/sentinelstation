@@ -1,14 +1,22 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using Mirror;
+using Debug = UnityEngine.Debug;
 
-public class APCPoweredDevice : NetworkBehaviour
+public class APCPoweredDevice : NetworkBehaviour, IServerDespawn
 {
 	public float MinimumWorkingVoltage = 190;
 	public float MaximumWorkingVoltage = 300;
-	public bool IsEnvironmentalDevice = false;
+
+	public DeviceType deviceType = DeviceType.None;
+
+	[SerializeField]
+	private bool isSelfPowered;
+
+	public bool IsSelfPowered => isSelfPowered;
 
 	[SerializeField]
 	private float wattusage = 0.01f;
@@ -38,23 +46,12 @@ public class APCPoweredDevice : NetworkBehaviour
 		EnsureInit();
 	}
 
-
 	void Start()
 	{
 		Logger.LogTraceFormat("{0}({1}) starting, state {2}", Category.Electrical, name, transform.position.To2Int(), State);
 		if (Wattusage > 0)
 		{
 			Resistance = 240 / (Wattusage / 240);
-		}
-		if (RelatedAPC != null)
-		{
-			if (IsEnvironmentalDevice)
-			{
-				RelatedAPC.EnvironmentalDevices.Add(this);
-			}
-			else {
-				RelatedAPC.ConnectedDevices.Add(this);
-			}
 		}
 	}
 
@@ -66,35 +63,19 @@ public class APCPoweredDevice : NetworkBehaviour
 
 	public void SetAPC(APC _APC)
 	{
+		if (_APC == null) return;
 		RemoveFromAPC();
 		RelatedAPC = _APC;
-		if (IsEnvironmentalDevice)
-		{
-			RelatedAPC.EnvironmentalDevices.Add(this);
-		}
-		else {
-			RelatedAPC.ConnectedDevices.Add(this);
-		}
+		RelatedAPC.ConnectedDevices.Add(this);
 	}
 
 	public void RemoveFromAPC()
 	{
-		if (RelatedAPC != null)
+		if (RelatedAPC == null) return;
+		if (RelatedAPC.ConnectedDevices.Contains(this))
 		{
-			if (IsEnvironmentalDevice)
-			{
-				if (RelatedAPC.EnvironmentalDevices.Contains(this))
-				{
-					RelatedAPC.EnvironmentalDevices.Remove(this);
-				}
-
-			}
-			else {
-				if (RelatedAPC.ConnectedDevices.Contains(this))
-				{
-					RelatedAPC.ConnectedDevices.Remove(this);
-				}
-			}
+			RelatedAPC.ConnectedDevices.Remove(this);
+			PowerNetworkUpdate(0.1f);
 		}
 	}
 
@@ -110,53 +91,38 @@ public class APCPoweredDevice : NetworkBehaviour
 		UpdateSynchronisedState(State, State);
 	}
 
-	public void APCBroadcastToDevice(APC APC)
-	{
-		if (RelatedAPC == null)
-		{
-			SetAPC(APC);
-		}
-	}
 	public void PowerNetworkUpdate(float Voltage) //Could be optimised to not update when voltage is same as previous voltage
 	{
-		if (Powered != null)
+		if (Powered == null) return;
+		if (AdvancedControlToScript)
 		{
-			if (AdvancedControlToScript)
+			Powered.PowerNetworkUpdate(Voltage);
+		}
+		else
+		{
+			var NewState = PowerStates.Off;
+			if (Voltage <= 1)
 			{
-				Powered.PowerNetworkUpdate(Voltage);
+				NewState = PowerStates.Off;
 			}
-			else
+			else if (Voltage > MaximumWorkingVoltage)
 			{
-				var NewState = PowerStates.Off;
-				if (Voltage <= 1)
-				{
-					NewState = PowerStates.Off;
-				}
-				else if (Voltage > MaximumWorkingVoltage)
-				{
-					NewState = PowerStates.OverVoltage;
-				}
-				else if (Voltage < MinimumWorkingVoltage)
-				{
-					NewState = PowerStates.LowVoltage;
-				}
-				else {
-					NewState = PowerStates.On;
-				}
-
-				if (NewState != State)
-				{
-					State = NewState;
-					Powered.StateUpdate(State);
-				}
+				NewState = PowerStates.OverVoltage;
+			}
+			else if (Voltage < MinimumWorkingVoltage)
+			{
+				NewState = PowerStates.LowVoltage;
+			}
+			else {
+				NewState = PowerStates.On;
 			}
 
+			if (NewState == State) return;
+			State = NewState;
+			Powered.StateUpdate(State);
 		}
 	}
-	public void OnDisable()
-	{
-		RemoveFromAPC();
-	}
+
 	private void UpdateSynchronisedState(PowerStates _OldState, PowerStates _State)
 	{
 		EnsureInit();
@@ -170,9 +136,37 @@ public class APCPoweredDevice : NetworkBehaviour
 		{
 			Powered.StateUpdate(State);
 		}
-	}  
+	}
+
+	void OnDrawGizmosSelected()
+	{
+		if (RelatedAPC == null)
+		{
+			if (isSelfPowered) return;
+			Gizmos.color = new Color(1f, 0f, 0, 1);
+			Gizmos.DrawCube(gameObject.transform.position,new Vector3(0.3f,0.3f));
+			return;
+		}
+
+		//Highlighting APC
+		Gizmos.color = new Color(0.5f, 0.5f, 1, 1);
+		Gizmos.DrawLine(RelatedAPC.transform.position, gameObject.transform.position);
+		Gizmos.DrawSphere(RelatedAPC.transform.position, 0.15f);
+	}
+
+	public void OnDespawnServer(DespawnInfo info)
+	{
+		RemoveFromAPC();
+	}
 }
 
+public enum DeviceType
+{
+	None,
+	Lights,
+	Environment,
+	Equipment
+}
 
 public enum PowerStates
 {
