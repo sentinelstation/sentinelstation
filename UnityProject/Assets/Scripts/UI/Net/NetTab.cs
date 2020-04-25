@@ -25,6 +25,7 @@ public enum NetTabType
 	SeedExtractor = 15,
 	Photocopier = 16,
 	ExosuitFabricator = 17,
+	Autolathe = 18,
 	//add your tabs here
 }
 
@@ -42,10 +43,10 @@ public class NetTab : Tab
 	public bool IsServer => transform.parent.name == nameof(NetworkTabManager);
 
 	//	public static readonly NetTab Invalid = new NetworkTabInfo(null);
-	private List<NetUIElement> Elements => GetComponentsInChildren<NetUIElement>(false).ToList();
+	private ISet<NetUIElementBase> Elements => new HashSet<NetUIElementBase>(GetComponentsInChildren<NetUIElementBase>(false));
 
-	public Dictionary<string, NetUIElement> CachedElements => cachedElements;
-	private Dictionary<string, NetUIElement> cachedElements = new Dictionary<string, NetUIElement>();
+	public Dictionary<string, NetUIElementBase> CachedElements => cachedElements;
+	private Dictionary<string, NetUIElementBase> cachedElements = new Dictionary<string, NetUIElementBase>();
 
 	//for server
 	public HashSet<ConnectedPlayer> Peepers => peepers;
@@ -87,7 +88,7 @@ public class NetTab : Tab
 	/// </summary>
 	protected virtual void InitServer() { }
 
-	public NetUIElement this[string elementId] => CachedElements.ContainsKey(elementId) ? CachedElements[elementId] : null;
+	public NetUIElementBase this[string elementId] => CachedElements.ContainsKey(elementId) ? CachedElements[elementId] : null;
 
 	//for server
 	public void AddPlayer(GameObject player)
@@ -109,9 +110,9 @@ public class NetTab : Tab
 
 	private void InitElements(bool serverFirstTime = false)
 	{
-		var elements = Elements;
 		//Init and add new elements to cache
-		foreach (NetUIElement element in elements)
+		var elements = Elements;
+		foreach (var element in elements)
 		{
 			if (serverFirstTime && element is NetPageSwitcher switcher && !switcher.StartInitialized)
 			{ //First time we make sure all pages are enabled in order to be scanned
@@ -120,19 +121,20 @@ public class NetTab : Tab
 				return;
 			}
 
-			if (!CachedElements.ContainsValue(element))
+			if (CachedElements.ContainsKey(element.name))
 			{
-				element.Init();
-
-				if (CachedElements.ContainsValue(element))
-				{
-					//Someone called InitElements in Init()
-					Logger.LogError($"'{name}': rescan during '{element}' Init(), aborting initial scan", Category.NetUI);
-					return;
-				}
-
-				CachedElements.Add(element.name, element);
+				continue;
 			}
+			element.Init();
+
+			if (CachedElements.ContainsKey(element.name))
+			{
+				//Someone called InitElements in Init()
+				Logger.LogError($"'{name}': rescan during '{element}' Init(), aborting initial scan", Category.NetUI);
+				return;
+			}
+
+			CachedElements.Add(element.name, element);
 		}
 
 		var toRemove = new List<string>();
@@ -146,39 +148,21 @@ public class NetTab : Tab
 		}
 
 		//Remove obsolete elements from cache
-		for (var i = 0; i < toRemove.Count; i++)
+		foreach (var removed in toRemove)
 		{
-			CachedElements.Remove(toRemove[i]);
+			CachedElements.Remove(removed);
 		}
 	}
 
 	/// Import values.
 	///
 	[CanBeNull]
-	public NetUIElement ImportValues(ElementValue[] values)
+	public NetUIElementBase ImportValues(ElementValue[] values)
 	{
 		var nonLists = new List<ElementValue>();
-		bool shouldRescan = false;
 
 		//set DynamicList values first (so that corresponding subelements would get created)
-		for (var i = 0; i < values.Length; i++)
-		{
-			var elementId = values[i].Id;
-			if (CachedElements.ContainsKey(elementId) &&
-				 (this[elementId] is NetUIDynamicList || this[elementId] is NetPageSwitcher))
-			{
-				bool listContentsChanged = this[elementId].Value != values[i].Value;
-				if (listContentsChanged)
-				{
-					this[elementId].Value = values[i].Value;
-					shouldRescan = true;
-				}
-			}
-			else
-			{
-				nonLists.Add(values[i]);
-			}
-		}
+		var shouldRescan = ImportContainer(values, nonLists);
 
 		//rescan elements in case of dynamic list changes
 		if (shouldRescan)
@@ -186,16 +170,47 @@ public class NetTab : Tab
 			RescanElements();
 		}
 
-		NetUIElement firstTouchedElement = null;
-
 		//set the rest of the values
-		for (var i = 0; i < nonLists.Count; i++)
+		return ImportNonContainer(nonLists);
+	}
+
+	private bool ImportContainer(ElementValue[] values, List<ElementValue> nonLists)
+	{
+		bool shouldRescan = false;
+		foreach (var elementValue in values)
 		{
-			var elementId = nonLists[i].Id;
-			if (CachedElements.ContainsKey(elementId))
+			var element = this[elementValue.Id];
+
+			if (CachedElements.ContainsKey(elementValue.Id) &&
+			    (element is NetUIDynamicList || element is NetPageSwitcher))
 			{
-				var element = this[elementId];
-				element.Value = nonLists[i].Value;
+				var listContentsChanged = element.ValueObject != elementValue.Value;
+				if (!listContentsChanged)
+				{
+					continue;
+				}
+
+				element.BinaryValue = elementValue.Value;
+				shouldRescan = true;
+			}
+			else
+			{
+				nonLists.Add(elementValue);
+			}
+		}
+
+		return shouldRescan;
+	}
+
+	private NetUIElementBase ImportNonContainer(List<ElementValue> nonLists)
+	{
+		NetUIElementBase firstTouchedElement = null;
+		foreach (var elementValue in nonLists)
+		{
+			if (CachedElements.ContainsKey(elementValue.Id))
+			{
+				var element = this[elementValue.Id];
+				element.BinaryValue = elementValue.Value;
 
 				if (firstTouchedElement == null)
 				{
@@ -204,9 +219,12 @@ public class NetTab : Tab
 			}
 			else
 			{
-				Logger.LogWarning($"'{name}' wonky value import: can't find '{elementId}'.\n Expected: {string.Join("/", CachedElements.Keys)}", Category.NetUI);
+				Logger.LogWarning(
+					$"'{name}' wonky value import: can't find '{elementValue.Id}'.\n Expected: {string.Join("/", CachedElements.Keys)}",
+					Category.NetUI);
 			}
 		}
+
 		return firstTouchedElement;
 	}
 
